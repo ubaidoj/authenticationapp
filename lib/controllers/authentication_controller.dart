@@ -1,79 +1,129 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
 class AuthenticatorController extends GetxController {
-  var accounts = <Map<String, String>>[].obs;
   var otpValues = <String, String>{}.obs;
   var timeLeft = 30.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    loadAccounts(); // ✅ Ensure accounts load on app start
-    _startOtpTimer();
-  }
+@override
+void onInit() {
+  super.onInit();
+  _loadOtpFromFirestore(); // ✅ Load OTPs from Firestore
+  _startOtpTimer();
+}
 
-  // ✅ Generate a random 6-digit OTP
+
   String _generateOtp() {
     final random = Random();
     return List.generate(6, (_) => random.nextInt(10).toString()).join();
   }
 
-  // ✅ Add an account and save it persistently
   void addAccount(String issuer, String account) async {
-    String otp = _generateOtp();
-    accounts.add({"issuer": issuer, "account": account, "pinned": "false"});
-    otpValues[account] = otp;
-    saveAccounts();
-  }
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
 
-  // ✅ Delete an account and update storage
+  String otp = _generateOtp();
+  Map<String, dynamic> newAccount = {
+    "issuer": issuer,
+    "account": account,
+    "pinned": false,
+    "otp": otp,  // ✅ Save OTP in Firestore
+  };
+
+  try {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .collection("accounts")
+        .add(newAccount);
+
+    otpValues[account] = otp; // ✅ Store in memory too
+    print("✅ Account added successfully: $newAccount");
+  } catch (e) {
+    print("❌ Error adding account: $e");
+  }
+}
+
+
+
   void deleteAccount(String account) async {
-    accounts.removeWhere((item) => item["account"] == account);
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    var accountsCollection = FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .collection("accounts");
+
+    var query = await accountsCollection.where("account", isEqualTo: account).get();
+    if (query.docs.isNotEmpty) {
+      await query.docs.first.reference.delete();
+    }
+
     otpValues.remove(account);
-    saveAccounts();
   }
 
-  // ✅ Pin/unpin account and update storage
-  void togglePin(String account) {
-    int index = accounts.indexWhere((item) => item["account"] == account);
-    if (index != -1) {
-      accounts[index]["pinned"] = (accounts[index]["pinned"] == "true") ? "false" : "true";
-      accounts.sort((a, b) => b["pinned"]!.compareTo(a["pinned"]!));
-      saveAccounts();
+  void togglePin(String account) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    var accountsCollection = FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .collection("accounts");
+
+    var query = await accountsCollection.where("account", isEqualTo: account).get();
+    if (query.docs.isNotEmpty) {
+      var doc = query.docs.first;
+      bool isPinned = doc["pinned"] ?? false;
+      await doc.reference.update({"pinned": !isPinned});
     }
   }
 
-  // ✅ Save accounts to SharedPreferences
-  Future<void> saveAccounts() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('accounts', jsonEncode(accounts));
-  }
-
-  // ✅ Load accounts from SharedPreferences
-  Future<void> loadAccounts() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? data = prefs.getString('accounts');
-
-    if (data != null && data.isNotEmpty) {
-      accounts.value = List<Map<String, String>>.from(jsonDecode(data));
-    }
-  }
-
-  // 🔄 OTP refresh every 30 seconds
   void _startOtpTimer() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (timeLeft.value == 0) {
-        for (var account in accounts) {
-          otpValues[account['account']!] = _generateOtp();
+  Timer.periodic(const Duration(seconds: 1), (timer) async {
+    if (timeLeft.value == 0) {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      for (var key in otpValues.keys) {
+        String newOtp = _generateOtp();
+        otpValues[key] = newOtp;
+
+        // ✅ Update OTP in Firestore
+        var accountsCollection = FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .collection("accounts");
+
+        var query = await accountsCollection.where("account", isEqualTo: key).get();
+        if (query.docs.isNotEmpty) {
+          await query.docs.first.reference.update({"otp": newOtp});
         }
-        timeLeft.value = 30;
-      } else {
-        timeLeft.value--;
       }
-    });
+      timeLeft.value = 30;
+    } else {
+      timeLeft.value--;
+    }
+  });
+}
+
+void _loadOtpFromFirestore() async {
+  User? user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+
+  var snapshot = await FirebaseFirestore.instance
+      .collection("users")
+      .doc(user.uid)
+      .collection("accounts")
+      .get();
+
+  for (var doc in snapshot.docs) {
+    String account = doc["account"];
+    otpValues[account] = _generateOtp(); // Generate OTP for each account
   }
+}
 }

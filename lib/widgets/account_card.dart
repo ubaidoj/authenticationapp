@@ -1,6 +1,6 @@
+import 'package:authenticationapp/controllers/authentication_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/authentication_controller.dart';
 
 class AccountCard extends StatelessWidget {
   final Map<String, String> account;
@@ -15,42 +15,46 @@ class AccountCard extends StatelessWidget {
         _showOptions(context, controller);
       },
       child: Card(
-        color: Colors.black87,
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           title: Text(
             account['account'] ?? '',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          subtitle: Text(
-            account['issuer'] ?? 'Unknown',
-            style: const TextStyle(fontSize: 14, color: Colors.white54),
-          ),
+          subtitle: Text(account['issuer'] ?? 'Unknown'),
           trailing: Obx(() {
-            return Row(
+            String otp = controller.otpValues[account['account']] ?? "------"; // ✅ Show OTP
+
+            return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // ✅ Show OTP Code
                 Text(
-                  controller.otpValues[account['account']] ?? '',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blueAccent),
+                  otp,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(71, 79, 234, 1),),
                 ),
-                const SizedBox(width: 10),
+
+                const SizedBox(height: 5),
+
+                // ✅ Circular Timer Progress
                 Stack(
                   alignment: Alignment.center,
                   children: [
                     SizedBox(
-                      width: 30,
-                      height: 30,
+                      width: 25,
+                      height: 25,
                       child: CircularProgressIndicator(
-                        value: controller.timeLeft.value / 30,
-                        strokeWidth: 3,
-                        color: Colors.blueAccent,
+                        value: controller.timeLeft.value / 30, // Normalize 0-30s
+                        backgroundColor: Colors.grey.shade300,
+                        color: Color.fromRGBO(71, 79, 234, 1),
+                        strokeWidth: 4,
                       ),
                     ),
+
+                    // ✅ Timer Countdown
                     Text(
                       controller.timeLeft.value.toString(),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -71,7 +75,7 @@ class AccountCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.push_pin, color: Colors.blueAccent),
+              leading: const Icon(Icons.push_pin, color: Color.fromRGBO(71, 79, 234, 1),),
               title: Text(account["pinned"] == "true" ? "Unpin Account" : "Pin Account"),
               onTap: () {
                 controller.togglePin(account["account"]!);
