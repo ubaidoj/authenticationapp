@@ -43,98 +43,99 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          controller: searchController,
-          decoration: const InputDecoration(
-            hintText: "Search Platform...",
-            border: InputBorder.none,
-          ),
-          onChanged: (query) {
-            setState(() {
-              searchQuery = query.toLowerCase();
-            });
-          },
+Widget build(BuildContext context) {
+  User? user = FirebaseAuth.instance.currentUser;
+
+  return Scaffold(
+    appBar: AppBar(
+      title: TextField(
+        controller: searchController,
+        decoration: const InputDecoration(
+          hintText: "Search Platform...",
+          border: InputBorder.none,
         ),
-        actions: [
-          CircleAvatar(
-            backgroundColor: Color.fromRGBO(71, 79, 234, 1),
-            child: Text(
-              userInitial,
-              style: const TextStyle(fontSize: 18, color: Colors.white),
-            ),
-          ),
-          const SizedBox(width: 10),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Color.fromRGBO(71, 79, 234, 1),),
-              child: Text(
-                "Authenticator App",
-                style: TextStyle(fontSize: 20, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text("Settings"),
-              onTap: () {},
-            ),
-            ListTile(
-              leading: Icon(Icons.logout),
-              title: Text("Logout"),
-              onTap: () {
-                authController.signOut();
-              },
-            ),
-          ],
-        ),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-  stream: FirebaseFirestore.instance
-    .collection("users")
-    .doc(FirebaseAuth.instance.currentUser!.uid)
-    .collection("accounts")
-    .snapshots(),
-  builder: (context, snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-      return const Center(child: Text("No accounts found")); // ✅ Prevent crash
-    }
-
-    var filteredAccounts = snapshot.data!.docs.where((doc) {
-      return (doc["issuer"] ?? "").toString().toLowerCase().contains(searchQuery);
-    }).toList();
-
-    return ListView.builder(
-      itemCount: filteredAccounts.length,
-      itemBuilder: (context, index) {
-        var account = filteredAccounts[index];
-        return AccountCard(account: {
-          "account": account["account"] ?? "",
-          "issuer": account["issuer"] ?? "",
-          "pinned": (account["pinned"] ?? false).toString(),
-
-        });
-      },
-    );
-  },
-),
-
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () async {
-          await Get.to(() => const AddAccountScreen());
-          setState(() {});
+        onChanged: (query) {
+          setState(() {
+            searchQuery = query.toLowerCase();
+          });
         },
       ),
-    );
-  }
+      actions: [
+        CircleAvatar(
+          backgroundColor: const Color.fromRGBO(71, 79, 234, 1),
+          child: Text(
+            userInitial,
+            style: const TextStyle(fontSize: 18, color: Colors.white),
+          ),
+        ),
+        const SizedBox(width: 10),
+      ],
+    ),
+    drawer: Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(color: Color.fromRGBO(71, 79, 234, 1)),
+            child: Text(
+              "Authenticator App",
+              style: TextStyle(fontSize: 20, color: Colors.white),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text("Settings"),
+            onTap: () {},
+          ),
+          ListTile(
+            leading: const Icon(Icons.logout),
+            title: const Text("Logout"),
+            onTap: () {
+              authController.signOut();
+            },
+          ),
+        ],
+      ),
+    ),
+    
+    body: user == null
+        ? const Center(child: Text("Please log in"))
+        : StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection("users")
+                .doc(user.uid)
+                .collection("accounts")
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(child: Text("No accounts found."));
+              }
+
+              return ListView(
+                children: snapshot.data!.docs.map((account) {
+                  final data = account.data() as Map<String, dynamic>? ?? {};
+
+                  return AccountCard(account: {
+                    "platform": data["platform"] ?? "Unknown", // ✅ Corrected field name
+                    "issuer": data["issuer"] ?? "Unknown",
+                    "pinned": (data["pinned"] ?? false).toString(),
+                  });
+                }).toList(),
+              );
+            },
+          ),
+
+    floatingActionButton: FloatingActionButton(
+      child: const Icon(Icons.add),
+      onPressed: () async {
+        await Get.to(() => const AddAccountScreen());
+        setState(() {}); // ✅ Refresh UI after adding an account
+      },
+    ),
+  );
+}
 }

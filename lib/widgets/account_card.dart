@@ -17,26 +17,36 @@ class AccountCard extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: ListTile(
-          title: Text(
-            account['account'] ?? '',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          title: Align(
+            alignment: Alignment.centerLeft, // ✅ Left-align the text
+            child: Text(
+              account['platform'] ?? '', // ✅ Correct field name
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold, // ✅ Bold font
+              ),
+            ),
           ),
-          subtitle: Text(account['issuer'] ?? 'Unknown'),
+
+          subtitle: Text(account['issuer'] ?? 'Unknown'), // ✅ Show issuer name
+
           trailing: Obx(() {
-            String otp = controller.otpValues[account['account']] ?? "------"; // ✅ Show OTP
+            String otp =
+                controller.otpValues[account['platform'] ?? ""] ?? "------";
+            // ✅ Use platform as key
 
             return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ✅ Show OTP Code
                 Text(
                   otp,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color.fromRGBO(71, 79, 234, 1),),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromRGBO(71, 79, 234, 1),
+                  ),
                 ),
-
                 const SizedBox(height: 5),
-
-                // ✅ Circular Timer Progress
                 Stack(
                   alignment: Alignment.center,
                   children: [
@@ -44,17 +54,16 @@ class AccountCard extends StatelessWidget {
                       width: 25,
                       height: 25,
                       child: CircularProgressIndicator(
-                        value: controller.timeLeft.value / 30, // Normalize 0-30s
+                        value: controller.timeLeft.value / 30,
                         backgroundColor: Colors.grey.shade300,
                         color: Color.fromRGBO(71, 79, 234, 1),
                         strokeWidth: 4,
                       ),
                     ),
-
-                    // ✅ Timer Countdown
                     Text(
                       controller.timeLeft.value.toString(),
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -75,8 +84,13 @@ class AccountCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(Icons.push_pin, color: Color.fromRGBO(71, 79, 234, 1),),
-              title: Text(account["pinned"] == "true" ? "Unpin Account" : "Pin Account"),
+              leading: const Icon(
+                Icons.push_pin,
+                color: Color.fromRGBO(71, 79, 234, 1),
+              ),
+              title: Text(account["pinned"] == "true"
+                  ? "Unpin Account"
+                  : "Pin Account"),
               onTap: () {
                 controller.togglePin(account["account"]!);
                 Navigator.pop(context);
@@ -86,9 +100,10 @@ class AccountCard extends StatelessWidget {
               leading: const Icon(Icons.delete, color: Colors.red),
               title: const Text("Delete Account"),
               onTap: () {
-                controller.deleteAccount(account["account"]!);
-                Navigator.pop(context);
-              },
+  controller.deleteAccount(account["platform"]!); // ✅ Use platform name
+  Navigator.pop(context);
+},
+
             ),
           ],
         ),

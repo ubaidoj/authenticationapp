@@ -45,5 +45,25 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- 📸 Camera Permission -->
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires camera access to take photos.</string>
+
+	<!-- 🖼️ Gallery (Photo Library) Permission -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to select photos.</string>
+
+	<!-- 💾 Save to Gallery Permission -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app requires access to save photos to your library.</string>
+
+	<!-- 🌐 Internet Access for Firestore -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
+
 </dict>
 </plist>
