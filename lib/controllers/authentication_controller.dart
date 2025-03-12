@@ -11,7 +11,7 @@ class AuthenticatorController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadAccountsFromFirestore(); // ✅ Load accounts with authentication keys
+    _loadAccountsFromFirestore(); 
     _startOtpTimer();
   }
 
@@ -22,7 +22,7 @@ class AuthenticatorController extends GetxController {
   Map<String, dynamic> newAccount = {
     "platform": platform,
     "authKey": authKey,
-    "issuer": platform, // ✅ Ensure issuer is saved
+    "issuer": platform, 
     "pinned": false,
   };
 
@@ -33,7 +33,7 @@ class AuthenticatorController extends GetxController {
         .collection("accounts")
         .add(newAccount);
 
-    otpValues[platform] = _generateOtp(authKey); // ✅ Use platform name as key
+    otpValues[platform] = _generateOtp(authKey); 
     print("✅ Account added successfully: $newAccount");
   } catch (e) {
     print("❌ Error adding account: $e");
@@ -54,9 +54,9 @@ class AuthenticatorController extends GetxController {
 
   if (query.docs.isNotEmpty) {
     for (var doc in query.docs) {
-      await doc.reference.delete(); // ✅ Delete each matching document
+      await doc.reference.delete(); 
     }
-    otpValues.remove(platform); // ✅ Remove OTP from the map
+    otpValues.remove(platform); 
     print("✅ Account deleted: $platform");
   } else {
     print("❌ No account found for: $platform");
@@ -87,7 +87,7 @@ class AuthenticatorController extends GetxController {
         }
       }
 
-      timeLeft.value = 30; // ✅ Restart Timer
+      timeLeft.value = 30; 
     } else {
       timeLeft.value--;
     }
@@ -112,7 +112,7 @@ class AuthenticatorController extends GetxController {
     String authKey = data["authKey"] ?? "";
     
     if (authKey.isNotEmpty) {
-      otpValues[platform] = _generateOtp(authKey); // ✅ Generate OTP for platform
+      otpValues[platform] = _generateOtp(authKey);
     }
   }
 }
@@ -121,11 +121,11 @@ class AuthenticatorController extends GetxController {
   String _generateOtp(String authKey) {
   return OTP.generateTOTPCodeString(
     authKey,
-    DateTime.now().millisecondsSinceEpoch ~/ 1000, // ✅ Convert to seconds
+    DateTime.now().millisecondsSinceEpoch ~/ 1000, 
     interval: 30,
     length: 6,
     algorithm: Algorithm.SHA1,
-    isGoogle: true, // ✅ Google Authenticator compatibility
+    isGoogle: true, 
   );
 }
 
@@ -147,6 +147,4 @@ void togglePin(String account) async {
     await doc.reference.update({"pinned": !isPinned});
   }
 }
-
-
 }

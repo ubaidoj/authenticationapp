@@ -39,7 +39,6 @@ class QRScannerScreen extends StatelessWidget {
     );
   }
 
-  // ✅ Extract platform name & authentication key from otpauth:// QR
   Map<String, String>? _parseOTPAuth(String qrData) {
   final Uri? uri = Uri.tryParse(qrData);
   if (uri == null || !uri.scheme.contains("otpauth")) return null;
@@ -62,7 +61,7 @@ class QRScannerScreen extends StatelessWidget {
 
     if (parsedData != null) {
       controller.addAccount(parsedData["platform"]!, parsedData["authKey"]!);
-      Get.back(); // Close scanner after successful scan
+      Get.back(); 
     } else {
       Get.snackbar("Invalid QR Code", "QR code format is incorrect",
           backgroundColor: Colors.red, colorText: Colors.white);

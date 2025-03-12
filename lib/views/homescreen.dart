@@ -120,7 +120,7 @@ Widget build(BuildContext context) {
                   final data = account.data() as Map<String, dynamic>? ?? {};
 
                   return AccountCard(account: {
-                    "platform": data["platform"] ?? "Unknown", // ✅ Corrected field name
+                    "platform": data["platform"] ?? "Unknown", 
                     "issuer": data["issuer"] ?? "Unknown",
                     "pinned": (data["pinned"] ?? false).toString(),
                   });
@@ -133,7 +133,7 @@ Widget build(BuildContext context) {
       child: const Icon(Icons.add),
       onPressed: () async {
         await Get.to(() => const AddAccountScreen());
-        setState(() {}); // ✅ Refresh UI after adding an account
+        setState(() {}); 
       },
     ),
   );

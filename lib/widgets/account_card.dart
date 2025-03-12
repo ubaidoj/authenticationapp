@@ -18,17 +18,17 @@ class AccountCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: ListTile(
           title: Align(
-            alignment: Alignment.centerLeft, // ✅ Left-align the text
+            alignment: Alignment.centerLeft,
             child: Text(
-              account['platform'] ?? '', // ✅ Correct field name
+              account['platform'] ?? '', 
               style: const TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.bold, // ✅ Bold font
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
 
-          subtitle: Text(account['issuer'] ?? 'Unknown'), // ✅ Show issuer name
+          subtitle: Text(account['issuer'] ?? 'Unknown'), 
 
           trailing: Obx(() {
             String otp =
@@ -101,7 +101,7 @@ class AccountCard extends StatelessWidget {
               title: const Text("Delete Account"),
               onTap: () {
                 controller
-                    .deleteAccount(account["platform"]!); // ✅ Use platform name
+                    .deleteAccount(account["platform"]!); 
                 Navigator.pop(context);
               },
             ),
