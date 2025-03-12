@@ -100,10 +100,10 @@ class AccountCard extends StatelessWidget {
               leading: const Icon(Icons.delete, color: Colors.red),
               title: const Text("Delete Account"),
               onTap: () {
-  controller.deleteAccount(account["platform"]!); // ✅ Use platform name
-  Navigator.pop(context);
-},
-
+                controller
+                    .deleteAccount(account["platform"]!); // ✅ Use platform name
+                Navigator.pop(context);
+              },
             ),
           ],
         ),
