@@ -1,3 +1,4 @@
+import 'package:authenticationapp/views/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:get/get.dart';
@@ -14,10 +15,11 @@ class QRScannerScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Scan QR Code"),
+        backgroundColor: Colors.white,
+        title: const Text("Scan QR Code", style: TextStyle(color: Colors.black, fontSize: 24),),
         actions: [
           IconButton(
-            icon: const Icon(Icons.photo_library),
+            icon: const Icon(Icons.photo_library, color: Colors.black,),
             onPressed: () => _pickQrImage(controller),
           ),
         ],
@@ -57,16 +59,17 @@ class QRScannerScreen extends StatelessWidget {
 
   // ✅ Handle QR data and add account
   void _handleScannedData(String qrData, AuthenticatorController controller) {
-    Map<String, String>? parsedData = _parseOTPAuth(qrData);
+  Map<String, String>? parsedData = _parseOTPAuth(qrData);
 
-    if (parsedData != null) {
-      controller.addAccount(parsedData["platform"]!, parsedData["authKey"]!);
-      Get.back(); 
-    } else {
-      Get.snackbar("Invalid QR Code", "QR code format is incorrect",
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
+  if (parsedData != null) {
+    controller.addAccount(parsedData["platform"]!, parsedData["authKey"]!);
+    Get.snackbar("Success", "Account added successfully", backgroundColor: Colors.green, colorText: Colors.white);
+    Get.off(HomeScreen()); // Navigate to Home Screen
+  } else {
+    Get.snackbar("Invalid QR Code", "QR code format is incorrect", backgroundColor: Colors.red, colorText: Colors.white);
   }
+}
+
 
   // ✅ Pick QR code from Gallery and scan it
   Future<void> _pickQrImage(AuthenticatorController controller) async {

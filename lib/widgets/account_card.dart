@@ -15,99 +15,131 @@ class AccountCard extends StatelessWidget {
         _showOptions(context, controller);
       },
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: ListTile(
-          title: Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              account['platform'] ?? '', 
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+          child: ListTile(
+            title: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                account['platform']?.isNotEmpty == true
+                    ? account['platform']!
+                    : account['issuer'] ?? 'Unknown',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-
-          subtitle: Text(account['issuer'] ?? 'Unknown'), 
-
-          trailing: Obx(() {
-            String otp =
-                controller.otpValues[account['platform'] ?? ""] ?? "------";
-            // ✅ Use platform as key
-
-            return Column(
+            subtitle: account['platform']?.isNotEmpty == true &&
+                    account['platform'] != account['issuer']
+                ? Text(account['issuer'] ?? 'Unknown')
+                : null,
+            trailing: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  otp,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromRGBO(71, 79, 234, 1),
-                  ),
-                ),
+                Obx(() {
+                  String platform = account['platform'] ?? "";
+                  String otp = controller.otpValues[platform] ?? "------";
+
+                  return Text(
+                    otp,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  );
+                }),
                 const SizedBox(height: 5),
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: CircularProgressIndicator(
-                        value: controller.timeLeft.value / 30,
-                        backgroundColor: Colors.grey.shade300,
-                        color: Color.fromRGBO(71, 79, 234, 1),
-                        strokeWidth: 4,
+                Obx(() {
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 25,
+                        height: 25,
+                        child: CircularProgressIndicator(
+                          value: controller.timeLeft.value / 30,
+                          backgroundColor: Colors.grey[300],
+                          color: Colors.blue,
+                          strokeWidth: 4,
+                        ),
                       ),
-                    ),
-                    Text(
-                      controller.timeLeft.value.toString(),
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
+                      Text(
+                        controller.timeLeft.value.toString(),
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  );
+                }),
               ],
-            );
-          }),
+            ),
+          ),
         ),
       ),
     );
   }
 
   void _showOptions(BuildContext context, AuthenticatorController controller) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(
-                Icons.push_pin,
-                color: Color.fromRGBO(71, 79, 234, 1),
-              ),
-              title: Text(account["pinned"] == "true"
-                  ? "Unpin Account"
-                  : "Pin Account"),
-              onTap: () {
-                controller.togglePin(account["account"]!);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text("Delete Account"),
-              onTap: () {
-                controller
-                    .deleteAccount(account["platform"]!); 
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
+  TextEditingController editController = TextEditingController(text: account["platform"]);
+
+  showModalBottomSheet(
+    context: context,
+    builder: (context) => Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit, color: Colors.blue),
+            title: const Text("Edit Platform Name"),
+            onTap: () {
+              Navigator.pop(context);
+              _showEditDialog(context, controller, editController);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.red),
+            title: const Text("Delete Account"),
+            onTap: () {
+              controller.deleteAccount(account["platform"]!);
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+void _showEditDialog(BuildContext context, AuthenticatorController controller, TextEditingController editController) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Edit Platform Name"),
+      content: TextField(
+        controller: editController,
+        decoration: const InputDecoration(hintText: "Enter new platform name"),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: () {
+            if (editController.text.trim().isNotEmpty) {
+              controller.editPlatformName(account["platform"]!, editController.text.trim());
+            }
+            Navigator.pop(context);
+          },
+          child: const Text("Save"),
+        ),
+      ],
+    ),
+  );
+}
+
 }

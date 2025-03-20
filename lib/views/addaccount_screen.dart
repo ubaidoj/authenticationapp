@@ -1,3 +1,4 @@
+import 'package:authenticationapp/views/homescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:authenticationapp/controllers/authentication_controller.dart';
@@ -16,11 +17,15 @@ class _AddAccountScreenState extends State<AddAccountScreen> {
   final AuthenticatorController controller = Get.find();
 
   void _addAccount() {
-    if (platformController.text.isNotEmpty && authKeyController.text.isNotEmpty) {
-      controller.addAccount(platformController.text, authKeyController.text);
-      Get.back();
-    }
+  if (platformController.text.isNotEmpty && authKeyController.text.isNotEmpty) {
+    controller.addAccount(platformController.text, authKeyController.text);
+    Get.snackbar("Success", "Account added successfully", backgroundColor: Colors.green, colorText: Colors.white);
+    Get.off(HomeScreen()); // Navigate to Home Screen
+  } else {
+    Get.snackbar("Error", "Please fill all fields", backgroundColor: Colors.red, colorText: Colors.white);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
