@@ -135,12 +135,12 @@ class AuthenticatorController extends GetxController {
 
     /// ✅ Corrected timeCounter calculation
     int timestamp = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    int timeCounter = timestamp ~/ 30;  // This must align exactly with 30-second intervals
+    int timeCounter = timestamp ~/ 30;  
 
     /// ✅ Corrected OTP generation with SHA1 (same as Google Authenticator)
     String otp = OTP.generateTOTPCodeString(
       normalizedKey,
-      timeCounter * 30 * 1000,  // Ensuring correct interval start time
+      timeCounter * 30 * 1000,  
       interval: 30,
       length: 6,
       algorithm: Algorithm.SHA1,
