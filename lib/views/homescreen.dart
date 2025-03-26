@@ -16,7 +16,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final AuthController authController = Get.put(AuthController());
   final TextEditingController searchController = TextEditingController();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>(); // ✅ Add GlobalKey
+  final GlobalKey<ScaffoldState> _scaffoldKey =
+      GlobalKey<ScaffoldState>(); // ✅ Add GlobalKey
   String searchQuery = "";
   String userInitial = "";
   String userName = "";
@@ -53,7 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: IconButton(
           icon: const Icon(Icons.menu, color: Colors.black), // Menu Icon
           onPressed: () {
-            _scaffoldKey.currentState?.openDrawer(); // ✅ Use GlobalKey to open the drawer
+            _scaffoldKey.currentState
+                ?.openDrawer(); // ✅ Use GlobalKey to open the drawer
           },
         ),
         title: Container(
@@ -135,19 +137,27 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 // ✅ Remove duplicates using a Set and filter search results
-                Set<String> seenPlatforms = {};
+                // ✅ Remove duplicates based on authKey and platform
+                Set<String> seenAuthKeys = {};
 
                 var uniqueAccounts = snapshot.data!.docs.where((account) {
                   final data = account.data() as Map<String, dynamic>? ?? {};
                   String platform = data["platform"] ?? "Unknown";
+                  String authKey = data["authKey"] ??
+                      ""; // Ensure each auth has a unique key
+
+                  // Combine platform and authKey to check uniqueness
+                  String uniqueIdentifier = "$platform-$authKey";
 
                   // Filter search results
-                  bool matchesSearch = platform.toLowerCase().contains(searchQuery);
+                  bool matchesSearch =
+                      platform.toLowerCase().contains(searchQuery);
 
-                  if (seenPlatforms.contains(platform) || !matchesSearch) {
+                  if (seenAuthKeys.contains(uniqueIdentifier) ||
+                      !matchesSearch) {
                     return false;
                   } else {
-                    seenPlatforms.add(platform);
+                    seenAuthKeys.add(uniqueIdentifier);
                     return true;
                   }
                 }).toList();
@@ -156,7 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? const Center(child: Text("No matching accounts found."))
                     : ListView(
                         children: uniqueAccounts.map((account) {
-                          final data = account.data() as Map<String, dynamic>? ?? {};
+                          final data =
+                              account.data() as Map<String, dynamic>? ?? {};
 
                           return AccountCard(account: {
                             "platform": data["platform"] ?? "Unknown",
@@ -169,8 +180,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepPurple,
-        child: const Icon(Icons.add, color: Colors.white,)
-        ,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
         onPressed: () async {
           await Get.to(() => const AddAccountScreen());
           setState(() {});
