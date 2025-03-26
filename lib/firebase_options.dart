@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBJ_25lUjyN2kqL1Wn8qdLOWXj1LYZLuk8',
-    appId: '1:714138207287:android:4fc88734f3cbe9a22a6bb2',
+    appId: '1:714138207287:android:ba13524cb5c6ca322a6bb2',
     messagingSenderId: '714138207287',
     projectId: 'authenticatorapp-c67e4',
     storageBucket: 'authenticatorapp-c67e4.firebasestorage.app',
@@ -71,4 +71,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'authenticatorapp-c67e4.firebasestorage.app',
     iosBundleId: 'com.example.authenticationapp',
   );
+
 }

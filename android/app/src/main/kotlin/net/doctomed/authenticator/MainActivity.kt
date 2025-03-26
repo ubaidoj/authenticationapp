@@ -1,4 +1,4 @@
-package com.example.authenticationapp
+package net.doctomed.authenticator
 
 import io.flutter.embedding.android.FlutterActivity
 
