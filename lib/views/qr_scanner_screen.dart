@@ -14,7 +14,7 @@ class QRScannerScreen extends StatelessWidget {
     final MobileScannerController scannerController = MobileScannerController();
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppBar(  
         backgroundColor: Colors.white,
         title: const Text("Scan QR Code", style: TextStyle(color: Colors.black, fontSize: 24),),
         actions: [
